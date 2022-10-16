@@ -7,6 +7,7 @@ namespace FakerLib.Generator
     public interface IGenerator
     {
         //Generates values according to type of var
-        internal T GenerateValue<T>();
+        internal object GenerateValue(Type valueType);
+        //internal T GenerateValue<T>();
     }
 }

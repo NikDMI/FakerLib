@@ -11,22 +11,34 @@ namespace FakerLib.Generator
 
         //Generates values according to type of var
         //*** T must be checked in FakerLib.Generator.Config class before calling this method 
-        T IGenerator.GenerateValue<T>()
+        object IGenerator.GenerateValue(Type valueType)
         {
-            dynamic obj = default(T);
-            if (Config.IsIntegralType<T>())
+            dynamic obj;
+            //Generate value if type is supported
+            if (Config.IsIntegralType(valueType))
             {
                 obj = GenerateIntegralValue();
             } 
-            else if (Config.IsDoubleType<T>())
+            else if (Config.IsDoubleType(valueType))
             {
                 obj = GenerateDoubleValue();
             }
-            else if(typeof(T) == typeof(string))
+            else if(valueType == typeof(string))
             {
                 obj = GenerateStringValue();
             }
-
+            else
+            {
+                //Try create an instance of type
+                try
+                {
+                    obj = Activator.CreateInstance(valueType);
+                }
+                catch (Exception e)
+                {
+                    return null;
+                }
+            }
             return obj;
         }
 

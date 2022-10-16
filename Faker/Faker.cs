@@ -22,6 +22,7 @@ namespace FakerLib.Faker
             if (!IsSuitableDTO(typeof(T), out defaultConstructor)) return dataTransferObject;
             //Create DTO with the help of parametrless constuctor
             dataTransferObject = (T)defaultConstructor.Invoke(null);
+            FillPublicFields(dataTransferObject);
             return dataTransferObject;
         }
 
@@ -48,9 +49,12 @@ namespace FakerLib.Faker
         private void FillPublicFields<T>(T generatedObject)
         {
             var publicFields = typeof(T).GetFields();
-            foreach(var filedInfo in publicFields)
+            foreach(var fieldInfo in publicFields)
             {
-                //if()
+                if (Config.IsGeneratedType(fieldInfo.FieldType))
+                {
+                    fieldInfo.SetValue(generatedObject, _generator.GenerateValue(fieldInfo.FieldType));
+                }
             }
         }
     }
