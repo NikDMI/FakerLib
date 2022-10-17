@@ -1,4 +1,4 @@
-﻿
+﻿using System;
 
 namespace FakerLib.Faker
 {
@@ -7,4 +7,6 @@ namespace FakerLib.Faker
         //Creates DTO
         public T Create<T>();
     }
+
+    internal delegate object GenerateValueDelegate(Type objectType);
 }
