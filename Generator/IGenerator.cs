@@ -8,6 +8,5 @@ namespace FakerLib.Generator
     {
         //Generates values according to type of var
         internal object GenerateValue(Type valueType);
-        //internal T GenerateValue<T>();
     }
 }
