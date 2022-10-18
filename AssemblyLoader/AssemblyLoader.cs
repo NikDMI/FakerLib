@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.IO;
 using System.Reflection;
 
 namespace FakerLib.AssemblyLoader
 {
     public class AssemblyLoader : IAssemblyLoader
     {
-        public Type[] GetAssemblyTypesByImplementedInterface<T>(string assemblyFileName) where T : class
+        public Type[] GetAssemblyTypesByInterfaceInSpecialAssembly<T>(string assemblyFileName) where T : class
         {
             Assembly loadedAssembly;
             try
@@ -28,6 +28,24 @@ namespace FakerLib.AssemblyLoader
                 }
             }
             return suitableAssemblies.ToArray();
+        }
+
+
+        public Type[] GetAssemblyTypesByInterfaceInDirectory<T>(string assemblyDir = null) where T : class
+        {
+            if (assemblyDir == null) assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            List<Type> findAssemblies = new List<Type>();
+            try
+            {
+                var pluginAssemblies = Directory.EnumerateFiles(assemblyDir, "*.dll");
+                foreach (var pluginFileName in pluginAssemblies)
+                {
+                    findAssemblies.AddRange(GetAssemblyTypesByInterfaceInSpecialAssembly<T>(pluginFileName));
+                }
+            }
+            catch (Exception e) { }     //Dir not found exception
+
+            return findAssemblies.ToArray();
         }
 
     }
