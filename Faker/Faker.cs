@@ -45,7 +45,7 @@ namespace FakerLib.Faker
         }
 
 
-        //Check if type correspond contracts of DTO
+        //Check if type correspond contracts of DTO and create default instance
         private bool IsSuitableDTO(Type objType, out object generatedObject)
         {
             generatedObject = null;
@@ -65,6 +65,12 @@ namespace FakerLib.Faker
             if (Config.IsGeneratedType(objType))
             {
                 generatedObject = _generator.GenerateValue(objType);
+                return true;
+            }
+            //If it is a structure
+            if (objType.IsValueType)
+            {
+                generatedObject = Activator.CreateInstance(objType);
                 return true;
             }
             return false;
@@ -91,7 +97,7 @@ namespace FakerLib.Faker
             {
                 return this.Create;
             }
-            return null;
+            //return null;
         }
 
         //Return generated collection of primitive types
