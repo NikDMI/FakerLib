@@ -2,6 +2,7 @@
 using System.Reflection;
 using FakerLib.Generator;
 using System.Collections.Generic;
+using FakerLib.FakerConfig;
 
 
 namespace FakerLib.Faker
@@ -9,6 +10,7 @@ namespace FakerLib.Faker
     public class Faker : IFaker
     {
         private IGenerator _generator;
+        private IFakerConfig _fakerConfig;
         private Random _random = new Random();
         private List<Type> _generatedTypes;
 
@@ -23,6 +25,17 @@ namespace FakerLib.Faker
         //Creates DTO (or default presantation) -> user version
         public T Create<T>()
         {
+            _fakerConfig = null;
+            _generatedTypes = new List<Type>();
+            object generatedObject = Create(typeof(T));
+            if (generatedObject == null) return default(T);
+            return (T)generatedObject;
+        }
+
+        //Creates DTO (or default presantation) -> user version
+        public T Create<T>(IFakerConfig fakeConfig)
+        {
+            _fakerConfig = fakeConfig;
             _generatedTypes = new List<Type>();
             object generatedObject = Create(typeof(T));
             if (generatedObject == null) return default(T);
@@ -58,17 +71,8 @@ namespace FakerLib.Faker
                 return true;
             }
             //Check if it's ref type and has public parametless constructor
-            var publicCtor = objType.GetConstructors();
-            foreach (var ctor in publicCtor)
-            {
-                //***If type has public constructor without params
-                if (ctor.GetParameters().Length == 0)
-                {
-                    generatedObject = ctor.Invoke(null);
-                    _generatedTypes.Add(objType);    //Add to list of generated objects
-                    return true;
-                }
-            }
+            TryCreateDTOByConstructor(objType, out generatedObject);
+            if (generatedObject != null) return true;
             //If it is a structure
             if (objType.IsValueType)
             {
@@ -77,6 +81,54 @@ namespace FakerLib.Faker
                 return true;
             }
             return false;
+        }
+
+
+        private void TryCreateDTOByConstructor(Type objType, out object generatedObject)
+        {
+            var publicCtor = objType.GetConstructors();
+            //There is no constructors
+            if (publicCtor.Length == 0)
+            {
+                generatedObject = null;
+                return;
+            }
+            //Try find default constructor
+            foreach (var ctor in publicCtor)
+            {
+                //***If type has public constructor without params
+                if (ctor.GetParameters().Length == 0)
+                {
+                    generatedObject = ctor.Invoke(null);
+                    _generatedTypes.Add(objType);    //Add to list of generated objects
+                    return;
+                }
+            }
+            //Take first ctor with params
+            var firstCtor = publicCtor[0];
+            List<object> ctorParams = new List<object>();
+            foreach (var constructorParam in firstCtor.GetParameters())
+            {
+                if(_fakerConfig != null)
+                {
+                    IGenerator configGenerator = _fakerConfig.GetGeneratorByName(objType, constructorParam.Name, constructorParam.ParameterType);
+                    if(configGenerator != null)
+                    {
+                        ctorParams.Add(configGenerator.GenerateValue(constructorParam.ParameterType));
+                    }
+                    else
+                    {
+                        ctorParams.Add(Create(constructorParam.ParameterType));
+                    }
+
+                }
+                else
+                {
+                    ctorParams.Add(Create(constructorParam.ParameterType));
+                }
+            }
+            generatedObject = firstCtor.Invoke(ctorParams.ToArray());
+            _generatedTypes.Add(objType);   //Add to list of generated objects
         }
 
 
