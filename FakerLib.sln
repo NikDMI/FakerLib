@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31424.327
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FakerLib", "FakerLib.csproj", "{B680D5F3-ACF5-4EDA-BDED-9C27C8A8F6B0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FakerLib", "FakerLib.csproj", "{B680D5F3-ACF5-4EDA-BDED-9C27C8A8F6B0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "..\ConsoleApp\ConsoleApp.csproj", "{3566B852-06D5-446A-BE24-56D0FC095D6F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "..\ConsoleApp\ConsoleApp.csproj", "{3566B852-06D5-446A-BE24-56D0FC095D6F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicGenerator", "..\BasicGenerator\BasicGenerator.csproj", "{F3D5654D-EFB6-4049-9377-5DD3002C43D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{3566B852-06D5-446A-BE24-56D0FC095D6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3566B852-06D5-446A-BE24-56D0FC095D6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3566B852-06D5-446A-BE24-56D0FC095D6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3D5654D-EFB6-4049-9377-5DD3002C43D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3D5654D-EFB6-4049-9377-5DD3002C43D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3D5654D-EFB6-4049-9377-5DD3002C43D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3D5654D-EFB6-4049-9377-5DD3002C43D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

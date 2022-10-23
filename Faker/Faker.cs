@@ -19,6 +19,7 @@ namespace FakerLib.Faker
             _generator = generator;
         }
 
+
         //Creates DTO (or default presantation) -> user version
         public T Create<T>()
         {
@@ -28,6 +29,7 @@ namespace FakerLib.Faker
             return (T)generatedObject;
         }
 
+
         //Generate object or return null if generation is depricated -> class version
         private object Create(Type objectType)
         {
@@ -35,7 +37,7 @@ namespace FakerLib.Faker
             object generatedObject = null;
             if (!IsSuitableDTO(objectType, out generatedObject)) return null;
             //If obj is non generated reference type
-            if (!Config.IsGeneratedType(objectType))
+            if (!_generator.IsGeneratedValue(objectType))
             {
                 FillPublicFields(generatedObject);
                 FillPublicProperties(generatedObject);
@@ -49,7 +51,13 @@ namespace FakerLib.Faker
         private bool IsSuitableDTO(Type objType, out object generatedObject)
         {
             generatedObject = null;
-            //Check if it's ref type and has ppublic parametless constructor
+            //Check if it is generated type by IGenerator
+            if (_generator.IsGeneratedValue(objType))
+            {
+                generatedObject = _generator.GenerateValue(objType);
+                return true;
+            }
+            //Check if it's ref type and has public parametless constructor
             var publicCtor = objType.GetConstructors();
             foreach (var ctor in publicCtor)
             {
@@ -61,16 +69,11 @@ namespace FakerLib.Faker
                     return true;
                 }
             }
-            //Check if it is generated type by IGenerator
-            if (Config.IsGeneratedType(objType))
-            {
-                generatedObject = _generator.GenerateValue(objType);
-                return true;
-            }
             //If it is a structure
             if (objType.IsValueType)
             {
                 generatedObject = Activator.CreateInstance(objType);
+                _generatedTypes.Add(objType);    //Add to list of generated objects
                 return true;
             }
             return false;
@@ -85,7 +88,7 @@ namespace FakerLib.Faker
         //Returs method, that can be used to generate object of corresponding type (like Algorithm factory pattern)
         private GenerateValueDelegate GetGeneratedDelegate(Type objectType)
         {
-            if (Config.IsGeneratedType(objectType))
+            if (_generator.IsGeneratedValue(objectType))
             {
                 return _generator.GenerateValue;
             }
@@ -99,6 +102,7 @@ namespace FakerLib.Faker
             }
             //return null;
         }
+
 
         //Return generated collection of primitive types
         private object GenerateCollectionsTypes(Type collectionType)
@@ -129,7 +133,10 @@ namespace FakerLib.Faker
             foreach (var fieldInfo in publicFields)
             {
                 var generationAlgorithm = GetGeneratedDelegate(fieldInfo.FieldType);
-                fieldInfo.SetValue(generatedObject, generationAlgorithm(fieldInfo.FieldType));
+                if (!fieldInfo.IsInitOnly && !fieldInfo.IsLiteral)
+                {
+                    fieldInfo.SetValue(generatedObject, generationAlgorithm(fieldInfo.FieldType));
+                }
             }
         }
 
