@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using FakerLib.FakerConfig;
 
 
+
 namespace FakerLib.Faker
 {
     public class Faker : IFaker
@@ -138,13 +139,20 @@ namespace FakerLib.Faker
 
 
         //Returs method, that can be used to generate object of corresponding type (like Algorithm factory pattern)
-        private GenerateValueDelegate GetGeneratedDelegate(Type objectType)
+        private GenerateValueDelegate GetGeneratedDelegate(Type generatedObjectType, MemberInfo memberInfo, Type memberType)
         {
-            if (_generator.IsGeneratedValue(objectType))
+            if( _fakerConfig != null)
+            {
+                var configGenerator = _fakerConfig.GetGenerator(generatedObjectType, memberInfo);
+                if (configGenerator != null) return configGenerator.GenerateValue;
+            }
+            //Default generators
+            
+            if (_generator.IsGeneratedValue(memberType))
             {
                 return _generator.GenerateValue;
             }
-            else if (objectType.GetInterface(typeof(System.Collections.IList).FullName) != null && objectType.IsGenericType)
+            else if (memberType.GetInterface(typeof(System.Collections.IList).FullName) != null && memberType.IsGenericType)
             {
                 return this.GenerateCollectionsTypes;
             }
@@ -184,7 +192,7 @@ namespace FakerLib.Faker
             var publicFields = generatedObjectType.GetFields();
             foreach (var fieldInfo in publicFields)
             {
-                var generationAlgorithm = GetGeneratedDelegate(fieldInfo.FieldType);
+                var generationAlgorithm = GetGeneratedDelegate(generatedObjectType, (MemberInfo)fieldInfo, fieldInfo.FieldType);
                 if (!fieldInfo.IsInitOnly && !fieldInfo.IsLiteral)
                 {
                     fieldInfo.SetValue(generatedObject, generationAlgorithm(fieldInfo.FieldType));
@@ -202,7 +210,7 @@ namespace FakerLib.Faker
             {
                 if (propertyInfo.CanWrite)
                 {
-                    var generationAlgorithm = GetGeneratedDelegate(propertyInfo.PropertyType);
+                    var generationAlgorithm = GetGeneratedDelegate(generatedObjectType, (MemberInfo)propertyInfo, propertyInfo.PropertyType);
                     propertyInfo.SetValue(generatedObject, generationAlgorithm(propertyInfo.PropertyType));
                 }
             }
